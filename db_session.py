@@ -22,11 +22,14 @@ def global_init(db_file):
     engine = sa.create_engine(conn_str, echo=False)
     __factory = orm.sessionmaker(bind=engine)
 
-    from . import __all_models
+    import users
 
     SqlAlchemyBase.metadata.create_all(engine)
 
 
 def create_session() -> Session:
     global __factory
+    if not __factory:
+        global_init('main.db')
     return __factory()
+    

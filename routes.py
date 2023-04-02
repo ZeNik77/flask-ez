@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, make_response, redirect, render_template
 import subprocess
 from db_session import create_session
-from __all_models import users
+import users
 import hashlib
 import time
 import random
@@ -10,6 +10,7 @@ import random
 MAX_GAMES = 9999
 ROOM_IDS_RANGE = 10 ** 10
 USER_IDS_RANGE = 10 ** 10
+
 db_sess = create_session()
 
 app = Flask(__name__)
@@ -41,19 +42,20 @@ def index():
     return render_template('index.html', title='home', user=user)
 
 @app.route('/run_code', methods=['POST'])
-def run_code(request):
+def run_code():
     code = request.form['code']
     with open('code.txt', 'w') as f:
         f.write(code)
     out = subprocess.run(['python', 'code.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if not out.stderr:
         print(out.stdout)
-        return redirect('/run_code', out=out.stdout, code=code)
+        return render_template('index.html', out=out.stdout, err='', code=code)
     else:
         print(out.stderr)
-        return redirect('/run_code', err=out.stderr, code=code)
+        return render_template('index.html', out='', err=out.stderr, code=code)
+    
 @app.route('/login', methods=['POST', 'GET'])
-def login(request):
+def login():
     if request.is_json:
         username = request.json.get('name', 0)
         password = request.json.get('pass', 0)
@@ -98,13 +100,13 @@ def signup(request):
 
 
 @app.route('/leaderboard', methods=['POST', 'GET'])
-def leaderboard(request):
+def leaderboard():
     leaderboard_data = db_sess.query(users.User.name, users.User.rating).order_by(users.User.rating.desc()).all()
     return render_template('leaderboard.html', leaderboard_data=leaderboard_data, cur_user=get_username(request))
 
 
 @app.route('/profile', methods=['GET'])
-def profile(request):
+def profile():
     id = account_check(request)
     if id:
         dataxd = db_sess.query(users.User.name, users.User.rating).filter(users.User.glob_id == id).first()
