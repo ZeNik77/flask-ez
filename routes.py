@@ -1,10 +1,9 @@
-from flask import Flask, request, jsonify, make_response, redirect, render_template
+from flask import Flask, request, url_for, make_response, redirect, render_template
 import subprocess
 from db_session import create_session
 import users
 import hashlib
 import time
-import random
 
 
 MAX_GAMES = 9999
@@ -19,9 +18,8 @@ def sha512(Password):
     HashedPassword = hashlib.sha512(Password.encode('utf-8')).hexdigest()
     return HashedPassword
 
-def account_check(req):
+def account_check(request):
     a = request.cookies.get('session', 0)
-
     if a:
         res = db_sess.query(users.User).filter(users.User.session == a).all()
         if len(res) == 1:
@@ -30,7 +28,8 @@ def account_check(req):
 
 def get_username(request):
     id = account_check(request)
-    username = db_sess.query(users.User.name).filter(users.User.glob_id == id).first()
+    username = db_sess.query(users.User.username).filter(users.User.glob_id == id).first()
+    #print('\''+username+'\'')
     if username:
         return username[0]
     else:
@@ -38,8 +37,10 @@ def get_username(request):
 
 @app.route('/')
 def index():
-    user = {'nickname': 'xd'}
-    return render_template('index.html', title='home', user=user)
+    print('\''+get_username(request)+'\'')
+    if get_username(request):
+        print('HAHAHA?')
+    return render_template('index.html', title='home', cur_user=get_username(request))
 
 @app.route('/run_code', methods=['POST'])
 def run_code():
@@ -56,60 +57,44 @@ def run_code():
     
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    if request.is_json:
-        username = request.json.get('name', 0)
-        password = request.json.get('pass', 0)
-        res = db_sess.query(users.User).filter(
-            users.User.name == username and users.User.hashed_password == password).all()
-        if res:
-            user = res[0]
-            session = sha512(user.hashed_password + str(time.time()))
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        user = db_sess.query(users.User).filter(users.User.username == username and users.User.password == password).first()
+        if user:
+            session = sha512(user.password + str(time.time()))
             user.session = session
             db_sess.commit()
-            res = make_response(session)
-            res.set_cookie("session", session, max_age=60 * 60 * 24 * 365 * 2)
+            res = make_response(redirect('/'))
+            res.set_cookie('session', session, max_age = 2 * 365 * 24 * 3600)
             return res
-    else:
-        return render_template('login.html', cur_user=get_username(request))
+    return render_template('login.html', cur_user=(get_username(request)))
 
 
 @app.route('/signup', methods=['POST', 'GET'])
-def signup(request):
-    if request.is_json:
-        username = request.json['name']
-        mail = request.json['mail']
-        password = request.json['pass']
-        usrs = db_sess.query(users.User).filter(users.User.email == mail or users.User.name == username).all()
-        if len(usrs) == 0:
-            try:
-                new = users.User()
-                new.glob_id = random.randint(1, USER_IDS_RANGE)
-                new.email = mail
-                new.rating = 0
-                new.name = username
-                new.hashed_password = password
-                db_sess.add(new)
-                db_sess.commit()
-            except:
-                return 'server error'
-            return 'Ok'
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        
+        all_users = db_sess.query(users.User).all()
+        if all_users:
+            last_id = all_users[-1].glob_id
         else:
-            return 'Failed'
-    else:
-        return render_template('signup.html', cur_user=get_username(request))
+            last_id = 0
+        new_user = users.User(username=username, email=email, password=sha512(password), glob_id=last_id + 1)
+        db_sess.add(new_user)
+        db_sess.commit()
+        return redirect(url_for('index'))
+    return render_template('signup.html', cur_user=get_username(request))
 
-
-@app.route('/leaderboard', methods=['POST', 'GET'])
-def leaderboard():
-    leaderboard_data = db_sess.query(users.User.name, users.User.rating).order_by(users.User.rating.desc()).all()
-    return render_template('leaderboard.html', leaderboard_data=leaderboard_data, cur_user=get_username(request))
-
-
-@app.route('/profile', methods=['GET'])
+@app.route('/profile', methods=['POST', 'GET'])
 def profile():
     id = account_check(request)
     if id:
-        dataxd = db_sess.query(users.User.name, users.User.rating).filter(users.User.glob_id == id).first()
+        dataxd = db_sess.query(users.User.username, users.User.rating).filter(users.User.glob_id == id).first()
         print(type(dataxd))
         if len(dataxd):
             print('\n\n\n', dataxd, '\n\n\n')
@@ -118,3 +103,8 @@ def profile():
             return "no data"
     else:
         return redirect('/signup')
+
+@app.route('/leaderboard', methods=['POST', 'GET'])
+def leaderboard():
+    leaderboard_data = db_sess.query(users.User.username, users.User.rating).order_by(users.User.rating.desc()).all()
+    return render_template('leaderboard.html', leaderboard_data=leaderboard_data, cur_user=get_username(request))

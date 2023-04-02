@@ -1,1 +1,1 @@
-print('xd')
+print('2\n' * 100)

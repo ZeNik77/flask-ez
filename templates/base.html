@@ -19,11 +19,17 @@
                     <li><a href="#" class="nav-link px-2 text-white">О мне</a></li>
                 </ul>
 
-
+                {% if not cur_user %}
                 <div class="text-end">
-                    <button type="button" class="btn btn-outline-light me-2">Войти</button>
-                    <button type="button" class="btn btn-primary">Регистрация</button>
+                    <button type="button" class="btn btn-outline-light me-2"><a href="/login" class="nav-link px-2 text-white">Войти</a></button>
+                    <button type="button" class="btn btn-primary"><a href="/signup" class="nav-link px-2 text-white">Регистрация</a></button>
                 </div>
+                {% else %}
+                <a href="/profile" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-user"></span>
+                    {{ cur_user }}
+                  </a>
+                {% endif %}
             </div>
         </div>
     </header>
