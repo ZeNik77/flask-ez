@@ -28,7 +28,7 @@ def account_check(request):
 
 def get_username(request):
     id = account_check(request)
-    username = db_sess.query(users.User.username).filter(users.User.glob_id == id).first()
+    username = db_sess.query(users.User.name).filter(users.User.glob_id == id).first()
     #print('\''+username+'\'')
     if username:
         return username[0]
@@ -50,10 +50,10 @@ def run_code():
     out = subprocess.run(['python', 'code.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if not out.stderr:
         print(out.stdout)
-        return render_template('index.html', out=out.stdout, err='', code=code)
+        return render_template('index.html', cur_user=get_username(request), out=out.stdout, err='', code=code)
     else:
         print(out.stderr)
-        return render_template('index.html', out='', err=out.stderr, code=code)
+        return render_template('index.html', cur_user=get_username(request), out='', err=out.stderr, code=code)
     
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -61,7 +61,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        user = db_sess.query(users.User).filter(users.User.username == username and users.User.password == password).first()
+        user = db_sess.query(users.User).filter(users.User.name == username and users.User.password == password).first()
         if user:
             session = sha512(user.password + str(time.time()))
             user.session = session
@@ -84,36 +84,62 @@ def signup():
             last_id = all_users[-1].glob_id
         else:
             last_id = 0
-        new_user = users.User(username=username, email=email, password=sha512(password), glob_id=last_id + 1)
+        new_user = users.User(name=username, email=email, password=sha512(password), glob_id=last_id + 1, about='xd')
         db_sess.add(new_user)
         db_sess.commit()
         return redirect(url_for('index'))
     return render_template('signup.html', cur_user=get_username(request))
 
-@app.route('/profile', methods=['POST', 'GET'])
+
+@app.route('/leaderboard', methods=['POST', 'GET'])
+def leaderboard():
+    leaderboard_data = db_sess.query(users.User.name, users.User.rating).order_by(users.User.rating.desc()).all()
+    return render_template('leaderboard.html', leaderboard_data=leaderboard_data, cur_user=get_username(request))
+
+
+@app.route('/profile', methods=['GET', 'POST'])
 def profile():
     id = account_check(request)
     if id:
         if request.method == 'POST':
-            user = db_sess.query(users.User).filter(users.User.glob_id==id).first()
-            if user[0]:
-                user = user[0]
-                user.session = ''
-                db_sess.commit()
-                return redirect('/login')
-
+            if 'logout' in request.form:
+                user = db_sess.query(users.User).filter(users.User.glob_id == id).first()
+                if user:
+                    user.session = ''
+                    db_sess.commit()
+                    # print('\n\n\nhere\n\n\n')
+                    return redirect('/login')
+            else:
+                return redirect('/edit_profile')
         else:
-            dataxd = db_sess.query(users.User.username, users.User.rating).filter(users.User.glob_id == id).first()
-            print(type(dataxd))
-            if len(dataxd):
-                print('\n\n\n', dataxd, '\n\n\n')
-                return render_template('profile.html', data=dataxd, cur_user=get_username(request))
+            user = db_sess.query(users.User.name, users.User.rating, users.User.about, users.User.email).filter(
+                users.User.glob_id == id).first()
+            # print(type(user))
+            if len(user):
+                # print('\n\n\n', dataxd, '\n\n\n')
+                return render_template('profile.html', cur_user=user[0], rating=user[1], about=user[2], email=user[3])
             else:
                 return "no data"
     else:
         return redirect('/signup')
 
-@app.route('/leaderboard', methods=['POST', 'GET'])
-def leaderboard():
-    leaderboard_data = db_sess.query(users.User.username, users.User.rating).order_by(users.User.rating.desc()).all()
-    return render_template('leaderboard.html', leaderboard_data=leaderboard_data, cur_user=get_username(request))
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+def edit_profile():
+    id = account_check(request)
+    if id:
+        user = db_sess.query(users.User).filter(users.User.glob_id == id).first()
+        if request.method == 'POST':
+            if 'confirm' in request.form:
+                if user:
+                    user.name = request.form['name']
+                    user.about = request.form['about']
+                    db_sess.commit()
+                    return redirect('/profile')
+                else:
+                    return redirect('/profile')
+            if 'cancel' in request.form:
+                return redirect('/profile')
+        print('\n\n\n', user.name, '\n\n\n')
+        return render_template('edit_profile.html', cur_user=user.name, about=user.about, email=user.email,
+                               rating=user.rating)
