@@ -145,3 +145,10 @@ def edit_profile():
 @app.route('/about', methods=['GET'])
 def about():
     return render_template('about.html', cur_user=get_username(request))
+
+
+@app.route('/courses', methods=['GET', 'POST'])
+def courses():
+    if request.method == 'POST':
+        pass
+    return render_template('topic.html', cur_user=get_username(request), topic='Темы', title='все темы')
