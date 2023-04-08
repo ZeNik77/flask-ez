@@ -1,40 +1,32 @@
 {% extends "base.html" %}
-  {% block head %} <title>Code Entry Field</title> {% endblock %}
 
-  {% block body %}
-    <div class="container">
-      <h1>Code Entry Field</h1>
-      <form method="post" action="{{ url_for('run_code') }}">
-        <div class="form-group">
-          <label for="code">Enter your code here:</label>
-          <textarea class="form-control" id="code" name="code" rows="10">{{ code }}</textarea>
-        </div>
-        <button type="submit" class="btn btn-success">Run</button>
-      </form>
-    </div>
-    {% if code %}
-      <div class="accordion" id="accordionExample">
-        <div class="accordion-item">
-          <h4 class="accordion-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-              Code verdict
-            </button>
-          </h4>
-          <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
-            <div class="accordion-body">
-              {% if err %}
-                <strong>Error</strong><br>{{ err }}
-              {% else %}
-                <strong>Success</strong><br>{{ out }}
-              {% endif %}
+{% block head %}
+<title>Главная страница</title>
+{% endblock %}
 
-            </div>
-          </div>
-        </div>
+{% block body %}
+<div class="container">
+    <h1>Олимпиадное программирование</h1>
+    <p>Добро пожаловать на сайт для подготовки к олимпиадам по программированию! Здесь вы найдете задачи разной сложности, а также возможность проверить свои решения и узнать результаты.</p>
+    <div class="row">
+      <div class="col-md-6">
+        <h2>Новые задачи</h2>
+        <ul class="list-group">
+          <li class="list-group-item"><a href="#">Задача 1</a></li>
+          <li class="list-group-item"><a href="#">Задача 2</a></li>
+          <li class="list-group-item"><a href="#">Задача 3</a></li>
+          <li class="list-group-item"><a href="#">Задача 4</a></li>
+        </ul>
       </div>
-    {% endif %}
-  {% endblock %}
-
-
-  </body>
-</html>
+      <div class="col-md-6">
+        <h2>Результаты</h2>
+        <ul class="list-group">
+          <li class="list-group-item"><a href="#">Результаты за день</a></li>
+          <li class="list-group-item"><a href="#">Результаты за неделю</a></li>
+          <li class="list-group-item"><a href="#">Результаты за месяц</a></li>
+          <li class="list-group-item"><a href="#">Все результаты</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endblock %}

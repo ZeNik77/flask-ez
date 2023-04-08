@@ -37,24 +37,22 @@ def get_username(request):
 
 @app.route('/')
 def index():
-    print('\''+get_username(request)+'\'')
-    if get_username(request):
-        print('HAHAHA?')
-    return render_template('index.html', title='home', cur_user=get_username(request))
+    return render_template('index.html', cur_user=get_username(request))
 
-@app.route('/run_code', methods=['POST'])
+@app.route('/run_code', methods=['GET', 'POST'])
 def run_code():
-    code = request.form['code']
-    with open('code.txt', 'w') as f:
-        f.write(code)
-    out = subprocess.run(['python', 'code.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    if not out.stderr:
-        print(out.stdout)
-        return render_template('index.html', cur_user=get_username(request), out=out.stdout, err='', code=code)
-    else:
-        print(out.stderr)
-        return render_template('index.html', cur_user=get_username(request), out='', err=out.stderr, code=code)
-    
+    if request.method == 'POST':
+        code = request.form['code']
+        with open('code.txt', 'w') as f:
+            f.write(code)
+        out = subprocess.run(['python', 'code.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if not out.stderr:
+            print(out.stdout)
+            return render_template('run_code.html', cur_user=get_username(request), out=out.stdout, err='', code=code)
+        else:
+            print(out.stderr)
+            return render_template('run_code.html', cur_user=get_username(request), out='', err=out.stderr, code=code)
+    return render_template('run_code.html', title='home', cur_user=get_username(request))
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
@@ -146,4 +144,4 @@ def edit_profile():
 
 @app.route('/about', methods=['GET'])
 def about():
-    return render_template('about.html')
+    return render_template('about.html', cur_user=get_username(request))
