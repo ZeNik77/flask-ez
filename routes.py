@@ -125,7 +125,7 @@ def signup():
 
 @app.route('/leaderboard', methods=['POST', 'GET'])
 def leaderboard():
-    leaderboard_data = db_sess.query(users.User.name, users.User.rating).order_by(users.User.rating.desc()).all()
+    leaderboard_data = db_sess.query(users.User.name, users.User.rating).order_by(users.User.rating.desc()).all()[1:]
     return render_template('leaderboard.html', leaderboard_data=leaderboard_data, cur_user=get_username(request))
 
 
