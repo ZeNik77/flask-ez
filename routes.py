@@ -243,4 +243,10 @@ def admin():
         return redirect(url_for('admin'))
     id = account_check(request)
     user = get_user(id)
-    return render_template('admin.html', user=user, cur_user=get_username(request))
+    try:
+        if user.glob_id == 1:
+            return render_template('admin.html', user=user, cur_user=get_username(request))
+        else:
+            return 'слыш тебе сюда нельзя'
+    except Exception as e:
+        return 'слыш тебе сюда нельзя'
