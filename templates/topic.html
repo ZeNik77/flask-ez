@@ -8,6 +8,7 @@
 <div class="container">
     <h1>{{ theme }}</h1>
     <p>{{ description }}</p>
+    {% if data %}
     <table class="table">
       <thead>
         <tr>
@@ -24,5 +25,6 @@
         {% endfor %}
       </tbody>
     </table>
+    {% endif %}
   </div>
 {% endblock %}
