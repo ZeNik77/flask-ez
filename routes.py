@@ -57,19 +57,19 @@ def run(name, max_time):
     out = ''
     thread = threading.Thread(target=func, args=(['code.txt']))
     thread.start()
-    
+    print(max_time)
     while time.time() - cur_time < max_time:
         pass
-    del thread 
+    del thread
     if DONE:
         out = DONE
+        DONE = False
         if not out.stderr:
             return [out.stdout, '']
         else:
             return ['', out.stderr]
     else:
         return ['', 'TIME LIMIT EXCEEDED']
-    DONE = False
 
 
 @app.route('/run_code', methods=['GET', 'POST'])
