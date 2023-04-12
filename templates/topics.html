@@ -11,15 +11,15 @@
     <table class="table">
       <thead>
         <tr>
-          <th>Номер задачи</th>
-          <th>Название задачи</th>
+          <th>Номер темы</th>
+          <th>Название темы</th>
         </tr>
       </thead>
       <tbody>
         {% for i in range(data|length) %}
         <tr>
           <td>{{ i + 1 }}</td>
-          <td><a href="task?task_id={{ data[i].glob_id }}">{{ data[i].task }}</a></td>
+          <td><a href="/courses/course?course_id={{ data[i].id }}">{{ data[i].topic }}</a></td>
         </tr>
         {% endfor %}
       </tbody>

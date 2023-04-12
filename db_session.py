@@ -23,6 +23,8 @@ def global_init(db_file):
     __factory = orm.sessionmaker(bind=engine)
 
     import users
+    import topics
+    import tasks
 
     SqlAlchemyBase.metadata.create_all(engine)
 

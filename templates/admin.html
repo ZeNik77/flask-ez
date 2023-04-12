@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block head %}
+<meta charset="UTF-8">
+<title>Вход</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+{% endblock %}
+{% block body %}
+<form method="POST" action="{{ url_for('admin') }}">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h2 class="text-center">Тема</h2>
+                    <div class="form-group">
+                        <label for="topic">Введите тему</label>
+                        <input type="text" class="form-control" id="topic" name="topic">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Введите описание</label>
+                        <textarea class="form-control" id="description" name="description" rows="10">{{ code }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" id="confirm_topic" name="confirm_topic">Добавить тему</button>
+                <hr>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form method="POST" action="{{ url_for('admin') }}">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h2 class="text-center">Задача</h2>
+                    <div class="form-group">
+                        <label for="topic">Введите id темы</label>
+                        <input type="number" class="form-control" id="topic_id" name="topic_id">
+                    </div>
+                    <div class="form-group">
+                        <label for="task">Введите задачу</label>
+                        <input type="text" class="form-control" id="task" name="task">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Введите описание</label>
+                        <textarea class="form-control" id="description" name="description" rows="10">{{ code }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" id="confirm_task" name="confirm_task">Добавить задачу</button>
+                <hr>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

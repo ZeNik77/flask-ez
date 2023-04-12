@@ -2,6 +2,8 @@ from flask import Flask, request, url_for, make_response, redirect, render_templ
 import subprocess
 from db_session import create_session
 import users
+import topics
+import tasks
 import hashlib
 import time
 
@@ -34,6 +36,9 @@ def get_username(request):
         return username[0]
     else:
         return ''
+    
+def get_user(id):
+    return db_sess.query(users.User).filter(users.User.glob_id == id).first()
 
 @app.route('/')
 def index():
@@ -53,6 +58,7 @@ def run_code():
             print(out.stderr)
             return render_template('run_code.html', cur_user=get_username(request), out='', err=out.stderr, code=code)
     return render_template('run_code.html', title='home', cur_user=get_username(request))
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
@@ -151,4 +157,62 @@ def about():
 def courses():
     if request.method == 'POST':
         pass
-    return render_template('topic.html', cur_user=get_username(request), topic='Темы', title='все темы')
+    data = db_sess.query(topics.Topic).all()
+    return render_template('topics.html', cur_user=get_username(request), theme='Темы', title='Все темы', data=data)
+
+@app.route('/courses/course', methods=['GET', 'POST'])
+def course():
+    if request.method == 'POST':
+        pass
+    id = request.values.get('course_id', 0)
+    topic = db_sess.query(topics.Topic).filter(topics.Topic.glob_id == id).all()
+    if topic:
+        topic = topic[0]
+        data = db_sess.query(tasks.Task).filter(tasks.Task.topic_id == topic.id).all()
+        return render_template('topic.html', cur_user=get_username(request), theme=topic.topic, title=topic.topic, description=topic.description, data=data)
+    else:
+        return redirect('/courses')
+
+@app.route('/courses/task', methods=['GET', 'POST'])
+def task():
+    if request.method == 'POST':
+        pass
+    id = request.values.get('task_id', 0)
+    print(id)
+    task = db_sess.query(tasks.Task).filter(tasks.Task.glob_id == id).one()
+    if task:
+        return render_template('task.html', task=task.task, description=task.description, cur_user=get_username(request), title=task.task)
+    else:
+        return redirect('/courses')
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    if request.method == 'POST':
+        if 'confirm_topic' in request.form:
+            topic = request.form['topic']
+            description = request.form['description']
+            all_topics = db_sess.query(topics.Topic).all()
+            if all_topics:
+                id = all_topics[-1].glob_id
+            else:
+                id = 0
+            id += 1
+            new_topic = topics.Topic(glob_id=id, topic=topic, description=description)
+            db_sess.add(new_topic)
+            db_sess.commit()
+        if 'confirm_task' in request.form:
+            topic_id = request.form['topic_id']
+            task_name = request.form['task']
+            description = request.form['description']
+            all_tasks = db_sess.query(tasks.Task).all()
+            if all_tasks:
+                id = all_tasks[-1].glob_id
+            else:
+                id = 0
+            task = tasks.Task(glob_id=id+1, topic_id=topic_id, task=task_name, description=description)
+            db_sess.add(task)
+            db_sess.commit()
+        return redirect(url_for('admin'))
+    id = account_check(request)
+    user = get_user(id)
+    return render_template('admin.html', user=user, cur_user=get_username(request))
