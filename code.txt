@@ -1,2 +1,2 @@
-import os
-os.system('ipconfig')
+while True:
+    a = 2

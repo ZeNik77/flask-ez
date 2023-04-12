@@ -6,11 +6,13 @@ import topics
 import tasks
 import hashlib
 import time
-
+import threading
+import timeit
 
 MAX_GAMES = 9999
 ROOM_IDS_RANGE = 10 ** 10
 USER_IDS_RANGE = 10 ** 10
+DONE = False
 
 db_sess = create_session()
 
@@ -44,19 +46,45 @@ def get_user(id):
 def index():
     return render_template('index.html', cur_user=get_username(request))
 
+def func(name):
+    global DONE
+    DONE = subprocess.run(['python', name], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    
+
+def run(name, max_time):
+    global DONE
+    cur_time = time.time()
+    out = ''
+    thread = threading.Thread(target=func, args=(['code.txt']))
+    thread.start()
+    
+    while time.time() - cur_time < max_time:
+        pass
+    del thread 
+    if DONE:
+        out = DONE
+        if not out.stderr:
+            return [out.stdout, '']
+        else:
+            return ['', out.stderr]
+    else:
+        return ['', 'TIME LIMIT EXCEEDED']
+    DONE = False
+
+
 @app.route('/run_code', methods=['GET', 'POST'])
 def run_code():
     if request.method == 'POST':
-        code = request.form['code']
+        code = request.form['code'] 
         with open('code.txt', 'w') as f:
             f.write(code)
-        out = subprocess.run(['python', 'code.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if not out.stderr:
-            print(out.stdout)
-            return render_template('run_code.html', cur_user=get_username(request), out=out.stdout, err='', code=code)
+        out = run('code.txt', 3)
+        if not out[1]:
+            print(out[0])
+            return render_template('run_code.html', cur_user=get_username(request), out=out[0], err='', code=code)
         else:
-            print(out.stderr)
-            return render_template('run_code.html', cur_user=get_username(request), out='', err=out.stderr, code=code)
+            print(out[1])
+            return render_template('run_code.html', cur_user=get_username(request), out='', err=out[1], code=code)
     return render_template('run_code.html', title='home', cur_user=get_username(request))
 
 @app.route('/login', methods=['POST', 'GET'])
