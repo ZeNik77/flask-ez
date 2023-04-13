@@ -1,9 +1,9 @@
 from flask import Flask, request, url_for, make_response, redirect, render_template
 import subprocess
-from db_session import create_session
-import users
-import topics
-import tasks
+from data.db_session import create_session
+from data import users
+from data import topics
+from data import tasks
 import hashlib
 import time
 import threading
