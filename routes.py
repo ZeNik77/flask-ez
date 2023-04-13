@@ -7,7 +7,7 @@ import tasks
 import hashlib
 import time
 import threading
-import timeit
+import random
 
 MAX_GAMES = 9999
 ROOM_IDS_RANGE = 10 ** 10
@@ -44,7 +44,9 @@ def get_user(id):
 
 @app.route('/')
 def index():
-    return render_template('index.html', cur_user=get_username(request))
+    data = db_sess.query(tasks.Task).all()
+    data = random.sample(data, 4)
+    return render_template('index.html', cur_user=get_username(request), data=data)
 
 def func(name):
     global DONE

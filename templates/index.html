@@ -7,24 +7,15 @@
 {% block body %}
 <div class="container">
     <h1>Олимпиадное программирование</h1>
-    <p>Добро пожаловать на сайт для подготовки к олимпиадам по программированию! Здесь вы найдете задачи разной сложности, а также возможность проверить свои решения и узнать результаты.</p>
+    <p>Добро пожаловать на сайт для подготовки к олимпиадам по программированию! Здесь вы найдете задачи разной сложности, а также узнать теорию об алгоритмах и методах решения задач</p>
     <div class="row">
       <div class="col-md-6">
-        <h2>Новые задачи</h2>
+        <h2>Случайные задачи</h2>
         <ul class="list-group">
-          <li class="list-group-item"><a href="#">Задача 1</a></li>
-          <li class="list-group-item"><a href="#">Задача 2</a></li>
-          <li class="list-group-item"><a href="#">Задача 3</a></li>
-          <li class="list-group-item"><a href="#">Задача 4</a></li>
-        </ul>
-      </div>
-      <div class="col-md-6">
-        <h2>Результаты</h2>
-        <ul class="list-group">
-          <li class="list-group-item"><a href="#">Результаты за день</a></li>
-          <li class="list-group-item"><a href="#">Результаты за неделю</a></li>
-          <li class="list-group-item"><a href="#">Результаты за месяц</a></li>
-          <li class="list-group-item"><a href="#">Все результаты</a></li>
+          <li class="list-group-item"><a href="/courses/task?task_id={{data[0].glob_id}}">{{ data[0].task }}</a></li>
+          <li class="list-group-item"><a href="/courses/task?task_id={{data[1].glob_id}}">{{ data[1].task }}</a></li>
+          <li class="list-group-item"><a href="/courses/task?task_id={{data[2].glob_id}}">{{ data[2].task }}</a></li>
+          <li class="list-group-item"><a href="/courses/task?task_id={{data[3].glob_id}}">{{ data[3].task }}</a></li>
         </ul>
       </div>
     </div>
